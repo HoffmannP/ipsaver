@@ -1,7 +1,9 @@
 package ipspeicher
 
 import (
-	_ "testing"
+	"errors"
+	"github.com/DATA-DOG/go-sqlmock"
+	"testing"
 )
 
 /*
@@ -90,17 +92,38 @@ func (ips *Speicher) Sichern(e Eintrag) (bool, error) {
 	}
 	return false, nil
 }
-
-func (ips *Speicher) Schließen() {
-	ips.Db.Close()
-}
-
-func NewSpeicher(driverName, dataSourceName string) (*Speicher, error) {
-	db, err := sql.Open(driverName, dataSourceName)
-	if err != nil {
-		return nil, err
-	}
-	db.Exec("CREATE TABLE IF NOT EXISTS ips (name TEXT, ip TEXT, seit INT)")
-	return &Speicher{Db: db}, nil
-}
 */
+
+func TestSichern(t *testing.T) {
+	sql, err := sqlmock.New()
+	if err != nil {
+		t.Error(err)
+	}
+	/** TODO **/
+}
+
+func TestSchließen(t *testing.T) {
+	sql, err := sqlmock.New()
+	if err != nil {
+		t.Error(err)
+	}
+	ips := Speicher{Db: sql}
+	ips.Schließen()
+}
+
+func TestNewSpeicher(t *testing.T) {
+	sqlmock.ExpectExec("CREATE TABLE IF NOT EXISTS ips \\(name TEXT, ip TEXT, seit INT\\)").
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	_, err := NewSpeicher(sqlmock.New())
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestNewSpeicherFehlerDurchreichen(t *testing.T) {
+	exp := errors.New("test")
+	_, is := NewSpeicher(nil, exp)
+	if is == nil {
+		t.Errorf("Got %s, want %s", is, exp)
+	}
+}

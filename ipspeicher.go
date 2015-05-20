@@ -9,9 +9,8 @@ type Speicher struct {
 }
 
 func (ips *Speicher) getNeuste(name string) (Eintrag, error) {
-	// row := ips.Db.QueryRow("SELECT * FROM ips WHERE name = ? ORDER BY seit DESC LIMIT 1", name)
-	// return SqlEintrag(row)
-	return Eintrag{}, nil
+	row := ips.Db.QueryRow("SELECT * FROM ips WHERE name = ? ORDER BY seit DESC LIMIT 1", name)
+	return SqlEintrag(row)
 }
 
 func (ips *Speicher) istGespeichert(e Eintrag) (bool, error) {
@@ -99,8 +98,7 @@ func (ips *Speicher) Schließen() {
 	ips.Db.Close()
 }
 
-func NewSpeicher(driverName, dataSourceName string) (*Speicher, error) {
-	db, err := sql.Open(driverName, dataSourceName)
+func NewSpeicher(db *sql.DB, err error) (*Speicher, error) {
 	if err != nil {
 		return nil, err
 	}
