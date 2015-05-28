@@ -15,6 +15,9 @@ func (ips *Speicher) getNeuste(name string) (Eintrag, error) {
 
 func (ips *Speicher) istGespeichert(e Eintrag) (bool, error) {
 	neuste, err := ips.getNeuste(e.Name)
+	if err == sql.ErrNoRows {
+		return false, nil
+	}
 	if err != nil {
 		return false, err
 	}
@@ -76,7 +79,7 @@ func (ips *Speicher) Namen() ([]Eintrag, error) {
 
 	return ips.liste(
 		count,
-		"SELECT ips1.* FROM ips AS ips1 LEFT JOIN ips as ips2 ON ips1.name = ips2.name AND ips1.Date < ips2.Date WHERE ip2.Date IS NULL")
+		"SELECT ips1.* FROM ips AS ips1 LEFT JOIN ips as ips2 ON ips1.name = ips2.name AND ips1.seit < ips2.seit WHERE ips2.seit IS NULL")
 }
 
 func (ips *Speicher) Sichern(e Eintrag) (bool, error) {
